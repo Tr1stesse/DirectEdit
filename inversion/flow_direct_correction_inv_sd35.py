@@ -303,6 +303,7 @@ class Accurate_Inversion_SD3:
             gt_source_latent = all_latents[-(i + 2)].to(self.device)
             # mse = torch.mean((prev_sample_src - gt_source_latent) ** 2)
             # print(f"Step {i}: Source MSE with GT latent: {mse.item():.6f}")
+            
             # Reduce errors caused by minor error sources
             prev_sample_src = gt_source_latent
 
