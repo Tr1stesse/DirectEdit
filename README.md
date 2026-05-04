@@ -30,6 +30,8 @@ conda env create -f environment.yml
 conda activate directedit
 ```
 
+Download the checkpoints [SD-3.5-medium](https://huggingface.co/stabilityai/stable-diffusion-3.5-medium), [FLUX.1 Dev](https://huggingface.co/black-forest-labs/FLUX.1-dev) and [SAM2](https://huggingface.co/facebook/sam2.1-hiera-large) on Hugging Face.
+
 # 🚀 Inference on Real Image
 
 You can edit your own images using the Gradio demo:
