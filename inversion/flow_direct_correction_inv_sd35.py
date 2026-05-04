@@ -11,9 +11,6 @@ import json
 import cv2
 
 
-'''
-Rectified flow matching inversion with DDPM edit friendly inversion
-'''
 class Accurate_Inversion_SD3:
     def __init__(self, model, steps, device, inv_cfg, recov_cfg, skip_steps, saved_path):
         self.model = model
@@ -218,7 +215,7 @@ class Accurate_Inversion_SD3:
     @torch.no_grad()
     def direct_inversion(self, prompts, controller, all_latents, delta_list, original_size=None, mask_image=None):
         '''
-        direct inversion with euler method, and then edit with corrected latents
+        Direct inversion / Editing for SD3.5
         '''
         latent_cur = torch.cat([all_latents[-1].clone().detach()] * 2, dim=0).to(self.device)
         latent_mask = None

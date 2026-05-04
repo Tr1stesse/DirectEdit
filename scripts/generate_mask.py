@@ -13,6 +13,7 @@ from transformers import Sam2Model, Sam2Processor
 
 SAM2_MODEL_ID = "facebook/sam2.1-hiera-large"
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+SUPPORTED_MASK_EXTENSIONS = {".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff", ".webp"}
 
 
 
@@ -53,7 +54,7 @@ def get_editing_params_from_mllm(client, image_path, source_prompt, target_promp
 
     try:
         completion = client.chat.completions.create(
-            model="qwen3-vl-plus",
+            model="qwen3.6-plus",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {
@@ -110,7 +111,15 @@ def sam2_predict_from_box(image_rgb, input_box, model, processor):
     return mask_tensor.numpy() > 0
 
 
-def generate_mask_logic(image_rgb, edit_type, bbox_norm, model, processor):
+def dilate_mask(mask, kernel_size):
+    if kernel_size <= 0:
+        return mask
+
+    kernel = np.ones((int(kernel_size), int(kernel_size)), np.uint8)
+    return cv2.dilate(mask, kernel, iterations=1)
+
+
+def generate_mask_logic(image_rgb, edit_type, bbox_norm, model, processor, dilation_kernel_size=8):
     h, w = image_rgb.shape[:2]
 
     x1 = int(bbox_norm[0] / 1000 * w)
@@ -138,8 +147,10 @@ def generate_mask_logic(image_rgb, edit_type, bbox_norm, model, processor):
 
     if edit_type == "Local":
         final_mask = sam_mask.astype(np.uint8) * 255
+        final_mask = dilate_mask(final_mask, dilation_kernel_size)
     elif edit_type == "Background":
         final_mask = (1 - sam_mask.astype(np.uint8)) * 255
+        final_mask = dilate_mask(final_mask, dilation_kernel_size)
     else:
         final_mask = sam_mask.astype(np.uint8) * 255
 
@@ -158,7 +169,34 @@ def load_sam2_model():
     return sam_model, sam_processor
 
 
-def generate_mask_for_image(image_path, output_mask_path, source_prompt, target_prompt):
+def resolve_output_mask_path(image_path, output_mask_path):
+    image_stem = os.path.splitext(os.path.basename(image_path))[0]
+
+    if not output_mask_path:
+        return os.path.join(os.path.dirname(image_path), f"{image_stem}_mask.png")
+
+    output_mask_path = os.path.expanduser(output_mask_path)
+    _, ext = os.path.splitext(output_mask_path)
+    looks_like_dir = (
+        output_mask_path.endswith("/")
+        or output_mask_path.endswith("\\")
+        or os.path.isdir(output_mask_path)
+        or ext == ""
+    )
+
+    if looks_like_dir:
+        return os.path.join(output_mask_path, f"{image_stem}_mask.png")
+
+    if ext.lower() not in SUPPORTED_MASK_EXTENSIONS:
+        raise ValueError(
+            f"Unsupported mask extension '{ext}'. "
+            f"Use one of: {', '.join(sorted(SUPPORTED_MASK_EXTENSIONS))}"
+        )
+
+    return output_mask_path
+
+
+def generate_mask_for_image(image_path, output_mask_path, source_prompt, target_prompt, dilation_kernel_size=8):
     if not os.path.exists(image_path):
         raise FileNotFoundError(f"Image not found: {image_path}")
 
@@ -180,8 +218,16 @@ def generate_mask_for_image(image_path, output_mask_path, source_prompt, target_
 
     edit_type = mllm_res.get("type", "Global")
     bbox = mllm_res.get("bbox", [0, 0, 1000, 1000])
-    mask = generate_mask_logic(image_rgb, edit_type, bbox, sam_model, sam_processor)
+    mask = generate_mask_logic(
+        image_rgb,
+        edit_type,
+        bbox,
+        sam_model,
+        sam_processor,
+        dilation_kernel_size=dilation_kernel_size,
+    )
 
+    output_mask_path = resolve_output_mask_path(image_path, output_mask_path)
     output_dir = os.path.dirname(output_mask_path)
     if output_dir:
         os.makedirs(output_dir, exist_ok=True)
@@ -189,24 +235,36 @@ def generate_mask_for_image(image_path, output_mask_path, source_prompt, target_
     if not cv2.imwrite(output_mask_path, mask):
         raise RuntimeError(f"Failed to write mask: {output_mask_path}")
 
-    return mllm_res
+    return output_mask_path, mllm_res
 
 
 def main():
     parser = argparse.ArgumentParser(description="Generate one mask for a single image with MLLM + SAM2.")
     parser.add_argument("--image_path", type=str, required=True, help="Path to the input image")
-    parser.add_argument("--output_mask_path", type=str, required=True, help="Path to save the generated mask")
+    parser.add_argument(
+        "--output_mask_path",
+        type=str,
+        default="masks",
+        help="Mask file path or output directory. Directories save as <image_name>_mask.png.",
+    )
     parser.add_argument("--src_prompt", type=str, required=True, help="Source prompt describing the input image")
     parser.add_argument("--tar_prompt", type=str, required=True, help="Target prompt describing the desired edit")
+    parser.add_argument(
+        "--dilation_kernel_size",
+        type=int,
+        default=8,
+        help="Dilation kernel size for Local/Background masks. Set 0 to disable.",
+    )
     args = parser.parse_args()
 
-    generate_mask_for_image(
+    output_mask_path, _ = generate_mask_for_image(
         args.image_path,
         args.output_mask_path,
         args.src_prompt,
         args.tar_prompt,
+        dilation_kernel_size=args.dilation_kernel_size,
     )
-    print(f"Mask saved to: {args.output_mask_path}")
+    print(f"Mask saved to: {output_mask_path}")
 
 
 if __name__ == "__main__":

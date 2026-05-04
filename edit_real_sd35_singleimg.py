@@ -37,9 +37,7 @@ if __name__ == "__main__":
     ######### SD3 init
     pipe = StableDiffusion3Pipeline.from_pretrained("stabilityai/stable-diffusion-3.5-medium",
                                                     torch_dtype=torch.float16)
-    pipe = pipe.to("cuda")
 
-    # pipeline.enable_model_cpu_offload()
     pipe = pipe.to(args.device)
     pipe.transformer.eval()
     pipe.vae.eval()

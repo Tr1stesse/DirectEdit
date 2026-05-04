@@ -82,10 +82,10 @@ We also provide batch scripts based on the [PIE-bench](https://github.com/cure-l
 export PYTHONPATH=$(realpath "./"):$PYTHONPATH
 
 # SD3.5 
-python scripts/edit_real_sd35.py --inv_cfg 1 --recov_cfg 2 --attn_ratio 0.3 --src_path "PIE-bench" --saved_path "outputs"
+python scripts/edit_real_sd35.py --inv_cfg 1 --recov_cfg 2 --attn_ratio 0.3 --src_path "PIE-bench" --saved_path "outputs/sd35"
 
 # FLUX.1-dev
-python scripts/edit_real_flux.py --inv_cfg 1 --recov_cfg 2 --attn_ratio 0.15 --src_path "PIE-bench" --saved_path "outputs"
+python scripts/edit_real_flux.py --inv_cfg 1 --recov_cfg 2 --attn_ratio 0.15 --src_path "PIE-bench" --saved_path "outputs/flux"
 
 # Evaluation
 python evaluation/evaluate.py --metrics "structure_distance" "psnr_unedit_part" "lpips_unedit_part" "mse_unedit_part" "ssim_unedit_part" "clip_similarity_source_image"  "clip_similarity_target_image" "clip_similarity_target_image_edit_part"\

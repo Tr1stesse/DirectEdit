@@ -34,7 +34,6 @@ if __name__ == "__main__":
     g = torch.Generator(device=args.device).manual_seed(args.seed)
 
     pipe = FluxPipeline.from_pretrained("black-forest-labs/FLUX.1-dev", torch_dtype=torch.float16)
-    pipe = pipe.to("cuda")
 
     pipe = pipe.to(args.device)
     pipe.transformer.eval()

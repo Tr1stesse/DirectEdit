@@ -114,7 +114,7 @@ class Adalayernorm_replace(abc.ABC):
         self.cur_layer = 0
         self.num_adanorm = 0
         self.batch_size = len(prompts)
-        if type(self_replace_steps) is float:
+        if isinstance(self_replace_steps, (int, float)):
             self_replace_steps = 0, self_replace_steps
         self.num_self_replace = int(num_steps * self_replace_steps[0]), int(num_steps * self_replace_steps[1])
 
@@ -239,7 +239,7 @@ class SD3attention_adaln(abc.ABC):
         self.num_att_layers = 0
         self.batch_size = len(prompts)
         # self.cross_replace_alpha = ptp_utils.get_time_words_attention_alpha(prompts, num_steps, cross_replace_steps, tokenizer).to(device)
-        if type(self_replace_steps) is float:
+        if isinstance(self_replace_steps, (int, float)):
             self_replace_steps = [0, self_replace_steps]
         self.num_self_replace = int(num_steps * self_replace_steps[0]), int(num_steps * self_replace_steps[1])
 
@@ -285,7 +285,7 @@ class SD3attentionreplace(abc.ABC):
         self.num_att_layers = 0
         self.batch_size = len(prompts)
         # self.cross_replace_alpha = ptp_utils.get_time_words_attention_alpha(prompts, num_steps, cross_replace_steps, tokenizer).to(device)
-        if type(self_replace_steps) is float:
+        if isinstance(self_replace_steps, (int, float)):
             self_replace_steps = 0, self_replace_steps
         self.num_self_replace = int(num_steps * self_replace_steps[0]), int(num_steps * self_replace_steps[1])
 

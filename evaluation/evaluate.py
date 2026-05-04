@@ -120,18 +120,7 @@ if __name__=="__main__":
 
     parser.add_argument('--result_path', type=str, default="evaluation_result.csv")
     parser.add_argument('--device', type=str, default="cuda")
-    parser.add_argument('--edit_category_list',  nargs = '+', type=str, default=[
-                                                                                "0",
-                                                                                "1",
-                                                                                "2",
-                                                                                "3",
-                                                                                "4",
-                                                                                "5",
-                                                                                "6",
-                                                                                "7",
-                                                                                "8",
-                                                                                "9"
-                                                                                ])
+    parser.add_argument('--edit_category_list',  nargs = '+', type=str, default=["0","1","2","3","4","5","6","7","8","9"])
 
 
     args = parser.parse_args()
@@ -200,5 +189,5 @@ if __name__=="__main__":
     
     # calculate the mean of each column
     df = pd.read_csv(result_path)
-    mean_values = df.mean()
+    mean_values = df.mean(numeric_only=True)
     mean_values.to_csv('stat_' + result_path)

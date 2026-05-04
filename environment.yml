@@ -161,4 +161,5 @@ dependencies:
       - xxhash==3.5.0
       - yarl==1.18.3
       - zipp==3.21.0
+      - openai==2.15.0
 prefix: /root/miniconda3/envs/directedit

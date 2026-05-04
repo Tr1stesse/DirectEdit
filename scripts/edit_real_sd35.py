@@ -15,9 +15,9 @@ def get_parser():
     parser.add_argument('--num_steps', type=int, default=30)
     parser.add_argument('--skip_steps', type=int, default=0)
     parser.add_argument('--inv_cfg', type=float, default=1.0)
-    parser.add_argument('--recov_cfg', type=float, default=1.0)
-    parser.add_argument('--ly_ratio', type=float, default=1.0)
-    parser.add_argument('--attn_ratio', type=float, default=1.0)
+    parser.add_argument('--recov_cfg', type=float, default=2.0)
+    parser.add_argument('--ly_ratio', type=float, default=0.0)
+    parser.add_argument('--attn_ratio', type=float, default=0.3)
     parser.add_argument('--src_prompt', type=str, default="",)
     parser.add_argument('--tar_prompt', type=str, default="",)
     parser.add_argument('--src_path', type=str, default=None, required=True)
@@ -57,18 +57,17 @@ if __name__ == "__main__":
 
             file_name_stem = os.path.splitext(os.path.basename(img_f))[0]
 
-            mask_name = f"{file_name_stem}_mask.jpg"
+            mask_name = f"{file_name_stem}_mask.png"
             mask_path = os.path.join(args.src_path, "mask_generated", mask_name)
 
             if os.path.exists(mask_path):
-                # print(f"  -> Loading external mask: {mask_path}")
+                print(f"  -> Loading external mask: {mask_path}")
                 mask = Image.open(mask_path).convert("L")
 
                 if mask.size != image.size:
                     mask = mask.resize(image.size, Image.NEAREST)
             else:
-                print(f"  -> [Warning] Mask not found at {mask_path}. Using blank mask.")
-                mask = Image.new("L", image.size, 0)
+                mask = None
 
             # =======================================================
 

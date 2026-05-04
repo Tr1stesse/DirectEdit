@@ -5,6 +5,7 @@ from PIL import Image
 import torch.nn.functional as F
 from diffusers.pipelines.flux.pipeline_flux import calculate_shift, retrieve_timesteps
 
+
 class Accurate_Inversion_FLUX:
     def __init__(self, model, steps, device, inv_cfg, recov_cfg, skip_steps, saved_path):
         self.model = model
