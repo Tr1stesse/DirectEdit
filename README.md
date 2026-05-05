@@ -10,6 +10,8 @@
 
 
 
+<br>
+
 <p align="center">
 <img src="assets/teaser.png" width="1080px"/>
 </p>
