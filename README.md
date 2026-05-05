@@ -101,7 +101,12 @@ python evaluation/evaluate.py --metrics "structure_distance" "psnr_unedit_part" 
 If you find our work helpful, please cite our paper. Thanks for your support!
 
 ```
-
+@article{yang2026directedit,
+  title={DirectEdit: Step-Level Accurate Inversion for Flow-Based Image Editing},
+  author={Yang, Desong and Ye, Mang},
+  journal={arXiv preprint arXiv:2605.02417},
+  year={2026}
+}
 ```
 
 # Acknowledgements
